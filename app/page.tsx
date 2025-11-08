@@ -24,7 +24,7 @@ export default function Home() {
       const form = new FormData();
       form.append("file", file);
 
-      const res = await fetch("http://127.0.0.1:8000/api/upload", {
+      const res = await fetch("http://teamind-backend.onrender.com/api/upload", {
         method: "POST",
         body: form,
       });
@@ -53,7 +53,7 @@ export default function Home() {
     setLoadingText(true);
 
     try {
-      const res = await fetch("http://127.0.0.1:8000/api/summarize-text", {
+      const res = await fetch("http://teamind-backend.onrender.com/api/summarize-text", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
