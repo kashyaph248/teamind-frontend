@@ -2,6 +2,9 @@
 
 import React, { useState } from "react";
 
+// ✅ Set this to your actual Render backend URL
+const API_BASE = "https://teamind-backend.onrender.com";
+
 export default function Home() {
   const [file, setFile] = useState<File | null>(null);
   const [loadingFile, setLoadingFile] = useState(false);
@@ -24,20 +27,21 @@ export default function Home() {
       const form = new FormData();
       form.append("file", file);
 
-      const res = await fetch("http://teamind-backend.onrender.com/api/upload", {
+      const res = await fetch(`${API_BASE}/api/upload`, {
         method: "POST",
         body: form,
       });
 
+      const data = await res.json().catch(() => ({} as any));
+
       if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        throw new Error(data.detail || "File upload failed");
+        throw new Error((data as any).detail || "File upload failed");
       }
 
-      const data = await res.json();
-      setFileSummary(data.summary);
+      setFileSummary((data as any).summary || "No summary returned.");
     } catch (e: any) {
-      setError(e.message || "Something went wrong");
+      console.error(e);
+      setError(e.message || "Something went wrong while summarizing file.");
     } finally {
       setLoadingFile(false);
     }
@@ -53,7 +57,7 @@ export default function Home() {
     setLoadingText(true);
 
     try {
-      const res = await fetch("http://teamind-backend.onrender.com/api/summarize-text", {
+      const res = await fetch(`${API_BASE}/api/summarize-text`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -61,15 +65,16 @@ export default function Home() {
         body: JSON.stringify({ text: textInput }),
       });
 
+      const data = await res.json().catch(() => ({} as any));
+
       if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        throw new Error(data.detail || "Text summarize failed");
+        throw new Error((data as any).detail || "Text summarize failed");
       }
 
-      const data = await res.json();
-      setTextSummary(data.summary);
+      setTextSummary((data as any).summary || "No summary returned.");
     } catch (e: any) {
-      setError(e.message || "Something went wrong");
+      console.error(e);
+      setError(e.message || "Something went wrong while summarizing text.");
     } finally {
       setLoadingText(false);
     }
@@ -113,7 +118,7 @@ export default function Home() {
         <section className="bg-slate-900 border border-slate-800 rounded-2xl p-5 space-y-3">
           <h2 className="text-xl font-semibold">2️⃣ Summarize Raw Text</h2>
           <p className="text-slate-400 text-sm">
-            Paste any chat, email thread, meeting notes, or page content.
+            Paste any chat, email thread, meeting notes, or article content.
           </p>
           <textarea
             value={textInput}
@@ -141,7 +146,7 @@ export default function Home() {
         </section>
 
         {error && (
-          <div className="bg-red-900/40 border border-red-500/40 text-red-200 px-4 py-3 rounded-xl">
+          <div className="bg-red-900/40 border border-red-500/40 text-red-200 px-4 py-3 rounded-xl text-sm">
             {error}
           </div>
         )}
